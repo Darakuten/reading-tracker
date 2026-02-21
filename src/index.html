@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>読書トラッカー</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="app">
+    <!-- Sidebar -->
+    <aside id="sidebar">
+      <div class="sidebar-header">
+        <h1>📚 読書トラッカー</h1>
+        <button id="add-book-btn" class="btn-primary">+ 本を追加</button>
+      </div>
+      <div id="book-list"></div>
+    </aside>
+
+    <!-- Main content -->
+    <main id="main-content">
+      <div id="empty-state">
+        <div class="empty-icon">📖</div>
+        <p>左のサイドバーから本を選択するか、<br/>「本を追加」で新しい本を登録してください。</p>
+      </div>
+      <div id="book-detail" class="hidden">
+        <!-- Book header -->
+        <div id="book-header">
+          <div class="book-info">
+            <div class="book-cover" id="detail-cover"></div>
+            <div class="book-meta">
+              <h2 id="detail-title"></h2>
+              <p id="detail-author"></p>
+              <div class="book-stats">
+                <span id="detail-pages-stat"></span>
+                <span id="detail-status-badge"></span>
+              </div>
+            </div>
+          </div>
+          <div class="book-actions">
+            <button id="edit-book-btn" class="btn-secondary">編集</button>
+            <button id="delete-book-btn" class="btn-danger">削除</button>
+          </div>
+        </div>
+
+        <!-- Progress section -->
+        <section class="section">
+          <h3>読書進捗</h3>
+          <div class="progress-input-row">
+            <label>現在のページ:</label>
+            <input type="number" id="current-page-input" min="0" placeholder="0" />
+            <span id="total-pages-label"></span>
+            <button id="update-progress-btn" class="btn-primary">更新</button>
+          </div>
+          <div class="progress-bar-container">
+            <div class="progress-bar">
+              <div class="progress-fill" id="progress-fill"></div>
+            </div>
+            <span id="progress-percent"></span>
+          </div>
+        </section>
+
+        <!-- Timeline section -->
+        <section class="section">
+          <div class="section-header">
+            <h3>タイムライン</h3>
+            <button id="add-session-btn" class="btn-secondary">+ セッション追加</button>
+          </div>
+          <div id="timeline"></div>
+        </section>
+
+        <!-- Notes section -->
+        <section class="section">
+          <div class="section-header">
+            <h3>メモ・ノート</h3>
+            <button id="add-note-btn" class="btn-secondary">+ メモ追加</button>
+          </div>
+          <div id="notes-list"></div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <!-- Modal: Add/Edit Book -->
+  <div id="book-modal" class="modal hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="modal-title">本を追加</h3>
+        <button class="modal-close" id="book-modal-close">✕</button>
+      </div>
+      <div class="modal-body">
+        <label>タイトル <span class="required">*</span></label>
+        <input type="text" id="modal-book-title" placeholder="本のタイトル" />
+
+        <label>著者</label>
+        <input type="text" id="modal-book-author" placeholder="著者名" />
+
+        <label>総ページ数</label>
+        <input type="number" id="modal-book-pages" placeholder="300" min="1" />
+
+        <label>カバー色</label>
+        <div class="color-picker">
+          <button class="color-btn" data-color="#e63946" style="background:#e63946"></button>
+          <button class="color-btn" data-color="#f4a261" style="background:#f4a261"></button>
+          <button class="color-btn" data-color="#2a9d8f" style="background:#2a9d8f"></button>
+          <button class="color-btn" data-color="#457b9d" style="background:#457b9d"></button>
+          <button class="color-btn" data-color="#8338ec" style="background:#8338ec"></button>
+          <button class="color-btn" data-color="#06d6a0" style="background:#06d6a0"></button>
+        </div>
+
+        <label>ステータス</label>
+        <select id="modal-book-status">
+          <option value="unread">未読</option>
+          <option value="reading">読書中</option>
+          <option value="done">読了</option>
+        </select>
+
+        <label>開始日</label>
+        <input type="date" id="modal-book-start" />
+
+        <label>目標終了日</label>
+        <input type="date" id="modal-book-goal" />
+      </div>
+      <div class="modal-footer">
+        <button id="modal-cancel" class="btn-secondary">キャンセル</button>
+        <button id="modal-save" class="btn-primary">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Add Session -->
+  <div id="session-modal" class="modal hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>読書セッションを追加</h3>
+        <button class="modal-close" id="session-modal-close">✕</button>
+      </div>
+      <div class="modal-body">
+        <label>日付 <span class="required">*</span></label>
+        <input type="date" id="session-date" />
+
+        <label>開始ページ</label>
+        <input type="number" id="session-start-page" min="0" placeholder="0" />
+
+        <label>終了ページ</label>
+        <input type="number" id="session-end-page" min="0" placeholder="50" />
+
+        <label>読書時間 (分)</label>
+        <input type="number" id="session-duration" min="0" placeholder="30" />
+
+        <label>メモ</label>
+        <textarea id="session-memo" placeholder="この回の感想・メモ..." rows="3"></textarea>
+      </div>
+      <div class="modal-footer">
+        <button id="session-cancel" class="btn-secondary">キャンセル</button>
+        <button id="session-save" class="btn-primary">追加</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Add Note -->
+  <div id="note-modal" class="modal hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="note-modal-title">メモを追加</h3>
+        <button class="modal-close" id="note-modal-close">✕</button>
+      </div>
+      <div class="modal-body">
+        <label>ページ番号</label>
+        <input type="number" id="note-page" min="0" placeholder="例: 42" />
+
+        <label>タグ</label>
+        <div class="tag-picker">
+          <button class="tag-btn" data-tag="重要">重要</button>
+          <button class="tag-btn" data-tag="感想">感想</button>
+          <button class="tag-btn" data-tag="引用">引用</button>
+          <button class="tag-btn" data-tag="疑問">疑問</button>
+          <button class="tag-btn" data-tag="アイデア">アイデア</button>
+        </div>
+
+        <label>内容 <span class="required">*</span></label>
+        <textarea id="note-content" placeholder="メモを入力..." rows="5"></textarea>
+      </div>
+      <div class="modal-footer">
+        <button id="note-cancel" class="btn-secondary">キャンセル</button>
+        <button id="note-save" class="btn-primary">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
